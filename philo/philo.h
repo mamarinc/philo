@@ -6,7 +6,7 @@
 /*   By: mamarinc <mamarinc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/14 18:27:12 by mamarinc          #+#    #+#             */
-/*   Updated: 2024/05/04 17:33:06 by mamarinc         ###   ########.fr       */
+/*   Updated: 2024/05/05 13:47:15 by mamarinc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,23 @@
 # define THINK	"%ld %d is thinking\n"
 # define DEATH	"%ld %d died\n"
 
-typedef struct s_timer
+typedef struct s_life
 {
 	long int		timer;
 	int				stop;
+	int				meal_number;
 	pthread_mutex_t	lock_timer;
 
-}				t_timer;
+}				t_life;
 
 typedef struct s_data
 {
-	t_timer			timer;
+	t_life			life;
 	int				number_of_philosophers;
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				number_of_times_each_philosopher_must_eat;
-	int				meal_number;
 }				t_data;
 
 typedef struct s_forks

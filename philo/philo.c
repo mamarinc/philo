@@ -6,7 +6,7 @@
 /*   By: mamarinc <mamarinc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/14 18:28:26 by mamarinc          #+#    #+#             */
-/*   Updated: 2024/05/04 17:43:23 by mamarinc         ###   ########.fr       */
+/*   Updated: 2024/05/05 13:53:03 by mamarinc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,21 @@
 
 void	print_philo(char *str, t_philo *philo)
 {
-	if (ft_strcmp(str, DEATH))
-		pthread_mutex_lock(&philo->data->timer.lock_timer);
-	if (philo->data->timer.stop == 0)
+	if (!ft_strcmp(str, DEATH))
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
+	pthread_mutex_lock(&philo->data->life.lock_timer);
+	if (philo->data->life.stop == 0)
 	{
-		pthread_mutex_unlock(&philo->data->timer.lock_timer);
-		pthread_mutex_lock(&philo->data->timer.lock_timer);
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
+		pthread_mutex_lock(&philo->data->life.lock_timer);
 		if (!ft_strcmp(str, DEATH))
-			philo->data->timer.stop = 1;
-		pthread_mutex_unlock(&philo->data->timer.lock_timer);
-		pthread_mutex_lock(&philo->data->timer.lock_timer);
-		printf(str, philo->data->timer.timer, philo->number);
+			philo->data->life.stop = 1;
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
+		pthread_mutex_lock(&philo->data->life.lock_timer);
+		printf(str, philo->data->life.timer, philo->number);
 	}
 	if (ft_strcmp(str, DEATH))
-		pthread_mutex_unlock(&philo->data->timer.lock_timer);
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
 }
 
 void	*life(void *philos)
@@ -36,25 +37,26 @@ void	*life(void *philos)
 	long int		last_meal;
 
 	philo = (t_philo *)philos;
-	pthread_mutex_lock(&philo->data->timer.lock_timer);
-	last_meal = philo->data->timer.timer;
-	pthread_mutex_unlock(&philo->data->timer.lock_timer);
-	pthread_mutex_lock(&philo->data->timer.lock_timer);
-	while (philo->data->timer.stop == 0)
+	pthread_mutex_lock(&philo->data->life.lock_timer);
+	last_meal = philo->data->life.timer;
+	pthread_mutex_unlock(&philo->data->life.lock_timer);
+	if (philo->number % 2 == 0)
+		usleep(500);
+	pthread_mutex_lock(&philo->data->life.lock_timer);
+	while (philo->data->life.stop == 0)
 	{
-		pthread_mutex_unlock(&philo->data->timer.lock_timer);
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
 		philo_fork(philo, last_meal);
 		philo_take_forks(philo);
-		pthread_mutex_lock(&philo->data->timer.lock_timer);
-		last_meal = philo->data->timer.timer;
-		pthread_mutex_unlock(&philo->data->timer.lock_timer);
+		pthread_mutex_lock(&philo->data->life.lock_timer);
+		last_meal = philo->data->life.timer;
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
 		philo_eat(philo, last_meal);
 		finish_eating(philo);
 		philo_sleep(philo, last_meal);
-		print_philo(THINK, philo);
-		pthread_mutex_lock(&philo->data->timer.lock_timer);
+		pthread_mutex_lock(&philo->data->life.lock_timer);
 	}
-	pthread_mutex_unlock(&philo->data->timer.lock_timer);
+	pthread_mutex_unlock(&philo->data->life.lock_timer);
 	return (NULL);
 }
 
@@ -72,14 +74,14 @@ void	*timer(void *data_philo)
 	{
 		gettimeofday(&time, NULL);
 		new_time = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-		pthread_mutex_lock(&data->timer.lock_timer);
-		data->timer.timer = new_time - old_time;
-		if (data->timer.stop != 0)
+		pthread_mutex_lock(&data->life.lock_timer);
+		data->life.timer = new_time - old_time;
+		if (data->life.stop != 0)
 		{
-			pthread_mutex_unlock(&data->timer.lock_timer);
+			pthread_mutex_unlock(&data->life.lock_timer);
 			return (NULL);
 		}
-		pthread_mutex_unlock(&data->timer.lock_timer);
+		pthread_mutex_unlock(&data->life.lock_timer);
 		usleep(100);
 	}
 	return (NULL);

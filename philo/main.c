@@ -6,7 +6,7 @@
 /*   By: mamarinc <mamarinc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 13:24:25 by mamarinc          #+#    #+#             */
-/*   Updated: 2024/05/04 17:28:08 by mamarinc         ###   ########.fr       */
+/*   Updated: 2024/05/05 13:47:52 by mamarinc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static void	manage_threads(pthread_t *th, t_philo *philo, t_data *data, int i)
 		pthread_join(th[i], NULL);
 		i++;
 	}
-	if (data->timer.stop == 1)
+	if (data->life.stop == 1)
 		printf("Fail.\n");
 	else
 		printf("All philosophers have eaten well !\n");
@@ -36,7 +36,7 @@ static void	manage_threads(pthread_t *th, t_philo *philo, t_data *data, int i)
 		pthread_mutex_destroy(&philo[i].left_fork.lock);
 		i++;
 	}
-	pthread_mutex_destroy(&data->timer.lock_timer);
+	pthread_mutex_destroy(&data->life.lock_timer);
 }
 
 static void	start_philo(t_data *data)

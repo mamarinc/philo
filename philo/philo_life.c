@@ -6,11 +6,38 @@
 /*   By: mamarinc <mamarinc@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/03 15:23:00 by mamarinc          #+#    #+#             */
-/*   Updated: 2024/05/05 14:05:59 by mamarinc         ###   ########.fr       */
+/*   Updated: 2024/05/06 12:23:50 by mamarinc         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+
+int	philo_fork(t_philo *philo, long int last_meal)
+{
+	usleep(200);
+	pthread_mutex_lock(&philo->data->life.lock_timer);
+	pthread_mutex_lock(&philo->right_fork->lock);
+	pthread_mutex_lock(&philo->left_fork.lock);
+	while ((philo->left_fork.fork == 0 || philo->right_fork->fork == 0)
+		&& philo->data->life.stop == 0)
+	{
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
+		pthread_mutex_unlock(&philo->left_fork.lock);
+		pthread_mutex_unlock(&philo->right_fork->lock);
+		pthread_mutex_lock(&philo->data->life.lock_timer);
+		if ((philo->data->life.timer - last_meal) >= philo->data->time_to_die)
+			print_philo(DEATH, philo);
+		pthread_mutex_unlock(&philo->data->life.lock_timer);
+		usleep(100);
+		pthread_mutex_lock(&philo->data->life.lock_timer);
+		pthread_mutex_lock(&philo->right_fork->lock);
+		pthread_mutex_lock(&philo->left_fork.lock);
+	}
+	pthread_mutex_unlock(&philo->right_fork->lock);
+	pthread_mutex_unlock(&philo->left_fork.lock);
+	pthread_mutex_unlock(&philo->data->life.lock_timer);
+	return (0);
+}
 
 void	philo_take_forks(t_philo *philo)
 {
@@ -29,29 +56,6 @@ void	philo_take_forks(t_philo *philo)
 		pthread_mutex_lock(&philo->data->life.lock_timer);
 	}
 	pthread_mutex_unlock(&philo->data->life.lock_timer);
-}
-
-int	philo_fork(t_philo *philo, long int last_meal)
-{
-	pthread_mutex_lock(&philo->data->life.lock_timer);
-	while ((philo->left_fork.fork == 0 || philo->right_fork->fork == 0
-			|| philo->data->number_of_philosophers == 1)
-		&& philo->data->life.stop == 0)
-	{
-		pthread_mutex_unlock(&philo->data->life.lock_timer);
-		pthread_mutex_lock(&philo->data->life.lock_timer);
-		if ((philo->data->life.timer - last_meal) >= philo->data->time_to_die)
-			print_philo(DEATH, philo);
-		pthread_mutex_unlock(&philo->data->life.lock_timer);
-		usleep(100);
-		pthread_mutex_lock(&philo->data->life.lock_timer);
-	}
-	pthread_mutex_unlock(&philo->data->life.lock_timer);
-	pthread_mutex_lock(&philo->data->life.lock_timer);
-	if ((philo->data->life.timer - last_meal) >= philo->data->time_to_die)
-		print_philo(DEATH, philo);
-	pthread_mutex_unlock(&philo->data->life.lock_timer);
-	return (0);
 }
 
 int	philo_eat(t_philo *philo, long int last_meal)
